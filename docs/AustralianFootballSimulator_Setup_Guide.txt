@@ -1,0 +1,225 @@
+AUSTRALIAN FOOTBALL SIMULATOR
+Initial Development Setup Guide
+========================================
+
+PROJECT GOAL
+------------
+Build an object-oriented Australian football pyramid simulator with:
+- C# / .NET 10 simulation engine
+- ASP.NET Core REST API 
+- React / TypeScript frontend
+- PostgreSQL database and Entity Framework Core
+- xUnit automated tests and test-driven development (TDD)
+- Git and GitHub version control
+
+This guide records the initial Windows / VS Code / GitHub Desktop setup.
+Commands are intended for the VS Code PowerShell terminal.
+
+
+1. VERIFY THE .NET SDK
+---------------------
+Open VS Code > Terminal > New Terminal.
+
+    dotnet --version
+
+The project uses the .NET 10 SDK. If an older SDK is installed,
+download the Windows x64 .NET 10 SDK installer from:
+https://dotnet.microsoft.com/en-us/download/dotnet/10.0
+
+Restart VS Code after installing and check the version again.
+Multiple .NET SDK versions can coexist.
+
+
+2. CREATE AND OPEN THE REPOSITORY FOLDER
+----------------------------------------
+Create a folder called:
+
+    AustralianFootballSimulator
+
+Open that folder in VS Code via File > Open Folder.
+
+From the project root, create three folders:
+
+    mkdir backend, frontend, docs
+
+Purpose:
+- backend: C# simulation engine and, later, ASP.NET Core API
+- frontend: future React / TypeScript user interface
+- docs: project architecture and simulation rules
+
+Add a documentation file such as:
+
+    docs/SimulationRules.md
+
+Record the agreed simulation rules there as the project evolves.
+
+
+3. CREATE THE INITIAL C# CONSOLE PROJECT
+---------------------------------------
+From the repository root:
+
+    cd backend
+    dotnet new console -n FootballSimulator
+
+This creates backend/FootballSimulator/ and its initial files:
+- Program.cs: console application's entry point
+- FootballSimulator.csproj: project configuration
+
+The -n option is short for --name. It supplies the project name.
+
+To run the starter application, from backend/:
+
+    cd FootballSimulator
+    dotnet run
+
+Expected output:
+
+    Hello, World!
+
+Return to backend/:
+
+    cd ..
+
+Useful terminal commands:
+- pwd           Show current directory
+- cd FolderName Move into a folder
+- cd ..         Move up one directory
+
+
+4. CREATE THE .NET SOLUTION
+--------------------------
+From backend/:
+
+    dotnet new sln -n FootballSimulator
+
+With .NET 10, this creates FootballSimulator.slnx.
+A solution groups related projects; a .csproj describes one project.
+
+Add the console project to the solution:
+
+    dotnet sln add FootballSimulator/FootballSimulator.csproj
+
+Verify:
+
+    dotnet sln list
+
+The dotnet sln command finds the solution in the current directory
+when there is one unambiguous solution file. If needed, specify it:
+
+    dotnet sln FootballSimulator.slnx list
+
+
+5. CREATE THE XUNIT TEST PROJECT
+-------------------------------
+From backend/:
+
+    dotnet new xunit -n FootballSimulator.Tests
+
+Add it to the solution:
+
+    dotnet sln add FootballSimulator.Tests/FootballSimulator.Tests.csproj
+
+Verify both projects are included:
+
+    dotnet sln list
+
+Expected projects:
+- FootballSimulator/FootballSimulator.csproj
+- FootballSimulator.Tests/FootballSimulator.Tests.csproj
+
+
+6. REFERENCE THE APPLICATION FROM THE TEST PROJECT
+--------------------------------------------------
+From backend/:
+
+    dotnet add FootballSimulator.Tests/FootballSimulator.Tests.csproj reference FootballSimulator/FootballSimulator.csproj
+
+This adds a ProjectReference to FootballSimulator.Tests.csproj.
+The tests can then use public classes from the main project.
+
+Example XML entry (relative path separators may vary):
+
+    <ProjectReference Include="..\FootballSimulator\FootballSimulator.csproj" />
+
+Verify the solution builds:
+
+    dotnet build
+
+Optional: run the generated starter tests:
+
+    dotnet test
+
+The initial generated xUnit test is only a template. Meaningful
+simulation tests will be added in future TDD steps.
+
+
+7. INITIALISE AND PUBLISH THE GIT REPOSITORY
+-------------------------------------------
+Using GitHub Desktop:
+1. File > Add Local Repository.
+2. Select the existing AustralianFootballSimulator folder.
+3. If prompted, choose to create a repository in that folder.
+4. Choose the VisualStudio .gitignore template.
+5. Include a README.md.
+6. Create the repository and check that it tracks the existing files.
+7. Publish the repository to GitHub when ready.
+
+The .gitignore should exclude generated build folders such as
+bin/ and obj/. Review the changed-file list before committing.
+
+Suggested setup commit summary:
+
+    Set up .NET solution and xUnit testing infrastructure
+
+Suggested commit description:
+
+    Created the FootballSimulator console application and xUnit test
+    project. Added both projects to the .NET solution and configured
+    the test project reference to the main application.
+
+In GitHub Desktop: Commit to main > Push origin.
+
+
+8. EXPECTED STRUCTURE AFTER INITIAL SETUP
+-----------------------------------------
+AustralianFootballSimulator/
+|-- README.md
+|-- .gitignore
+|-- backend/
+|   |-- FootballSimulator.slnx
+|   |-- FootballSimulator/
+|   |   |-- FootballSimulator.csproj
+|   |   `-- Program.cs
+|   `-- FootballSimulator.Tests/
+|       |-- FootballSimulator.Tests.csproj
+|       `-- UnitTest1.cs
+|-- frontend/
+`-- docs/
+    `-- SimulationRules.md
+
+Note: Git does not track empty folders. The frontend directory will
+appear on GitHub once it contains a tracked file (such as .gitkeep).
+Generated bin/ and obj/ folders may exist locally but should be ignored.
+
+
+9. NEXT DEVELOPMENT MILESTONE
+----------------------------
+Begin test-driven development of the first football domain class.
+Use the Red -> Green -> Refactor cycle:
+1. Write a test describing the desired behaviour.
+2. Confirm it fails for the expected reason.
+3. Implement the smallest amount of code to pass it.
+4. Refactor while keeping the test green.
+
+Important simulation requirements to document and test later:
+- Home-and-away fixtures, with no home advantage
+- Ladder-position-based weighted match lottery
+- Rating = min(15, max(3, ladder position))
+- Ratings recalculated after each completed round
+- Six-team A-League finals series
+- A/B automatic promotion and relegation plus two-leg playoff
+- B/Conference geographic relegation and survival playoff gauntlet
+- Reproducible randomness via seeds, plus match-ledger validation
+
+========================================
+END OF SETUP GUIDE
