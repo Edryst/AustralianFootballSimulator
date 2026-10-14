@@ -1,0 +1,83 @@
+AUSTRALIAN FOOTBALL SIMULATOR
+WEIGHTED MATCH LOTTERY RULES
+Version: 1.0 | Agreed: 14 October 2026
+
+1. OVERVIEW
+Match outcomes use a three-outcome weighted lottery: Team A win, draw, or Team B win.
+Current league position is the primary factor. A fixed club strength rating provides a smaller secondary adjustment. There is no home advantage.
+
+2. POSITION RATING
+At the beginning of each round, freeze the current league standings. Use these frozen positions for every match in that round.
+
+position_rating = min(15, max(3, league_position))
+
+Thus 1st, 2nd and 3rd all have rating 3; 4th through 14th use their positions; 15th through 18th all have rating 15.
+
+For round 1, when no standings exist, use equal baseline odds for all three outcomes.
+
+3. BASELINE LOTTERY WEIGHTS
+Let rA and rB be the position ratings for Team A and Team B.
+
+- Team A win weight = rB
+- Team B win weight = rA
+- Draw weight = min(rA, rB)
+
+The draw therefore has the same BASELINE weight as the win weight of the team less favoured by league position. Strength adjustments NEVER modify the draw weight.
+
+4. FIXED CLUB STRENGTH
+Each club has a strength rating from 1.0 to 5.0, with higher numbers indicating a stronger club. Ratings stay fixed throughout a season.
+
+strength_difference = abs(strengthA - strengthB)
+
+Add the entire difference to the WIN weight of the club with the higher strength rating. If ratings are equal, add no bonus. Do not subtract from the other club, and do not modify the draw weight.
+
+If strengthA > strengthB:
+    adjusted_A_win = rB + (strengthA - strengthB)
+    adjusted_B_win = rA
+Else if strengthB > strengthA:
+    adjusted_A_win = rB
+    adjusted_B_win = rA + (strengthB - strengthA)
+Else:
+    adjusted_A_win = rB
+    adjusted_B_win = rA
+
+adjusted_draw = min(rA, rB)
+
+5. CONVERT WEIGHTS TO PROBABILITIES
+
+total_weight = adjusted_A_win + adjusted_draw + adjusted_B_win
+
+P(A win) = adjusted_A_win / total_weight
+P(draw)  = adjusted_draw / total_weight
+P(B win) = adjusted_B_win / total_weight
+
+The three probabilities must sum to 1 (100%), subject to rounding.
+
+6. WORKED EXAMPLES
+
+EXAMPLE A: 2nd place (strength 2.6) vs 7th place (strength 2.8)
+Position ratings: 3 and 7. Team B receives +0.2 strength bonus.
+Weights: A win 7, draw 3, B win 3.2; total 13.2.
+Probabilities: A win 53.03%; draw 22.73%; B win 24.24%.
+
+EXAMPLE B: 1st place vs 14th place, equal strength
+Position ratings: 3 and 14. No strength bonus.
+Weights: A win 14, draw 3, B win 3; total 20.
+Probabilities: A win 70.00%; draw 15.00%; B win 15.00%.
+
+EXAMPLE C: 1st place (strength 4.6) vs 18th place (strength 1.2)
+Position ratings: 3 and 15 (18th capped at 15).
+Team A receives +3.4 strength bonus.
+Weights: A win 18.4, draw 3, B win 3; total 24.4.
+Probabilities: A win 75.41%; draw 12.30%; B win 12.30%.
+
+7. IMPLEMENTATION NOTES
+- Use a seeded random number generator so a simulation can be reproduced.
+- Freeze standings before the round; do not recalculate position-based odds midway through a round.
+- Draw a random outcome proportionally to the three weights, then generate a scoreline consistent with the selected outcome.
+- No home advantage.
+- Keep the probability calculation separate from scoreline generation so each can be unit-tested.
+- Validate strength ratings to ensure they fall between 1.0 and 5.0.
+
+8. DESIGN CLARIFICATION
+The agreed examples use draw weight = min(rA, rB), which is the same as the BASELINE win weight of the team less favoured by position. The draw receives no strength bonus. This preserves the originally discussed three-outcome lottery (e.g. 1st vs 18th has baseline weights 15:3:3), while adding the strength difference only to the stronger club's win weight.
