@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="FootballSimulator.Tests/FootballSimulator.Tests.csproj" />
+  <Project Path="FootballSimulator/FootballSimulator.csproj" />
+</Solution>
