@@ -1,0 +1,162 @@
+AUSTRALIAN FOOTBALL SIMULATOR
+PROJECT VISION, ARCHITECTURE AND DEVELOPMENT ROADMAP
+Version: 1.0 | 14 October 2026
+
+1. PROJECT GOAL
+Build a complete Australian football pyramid simulator as a full-stack software portfolio project. The application should simulate clubs, fixtures, results, league tables, seasons, finals, promotion and relegation, while exposing the simulation through a REST API, persisting data in a relational database, and providing an interactive web frontend.
+
+The project is intended to demonstrate practical junior/graduate-level software engineering skills: C# and object-oriented design, test-driven development, REST APIs, relational data modelling, database integration, React/TypeScript, version control, debugging, and clear technical documentation.
+
+2. AGREED TECHNOLOGY STACK
+- Language and simulation engine: C# on .NET 10
+- Backend web service: ASP.NET Core Web API
+- Database: PostgreSQL
+- Database access: Entity Framework Core (EF Core)
+- Frontend: React with TypeScript
+- Testing: xUnit for C# unit tests; add API/integration tests later
+- Development environment: Visual Studio Code
+- Version control: Git and GitHub, using GitHub Desktop
+
+3. HIGH-LEVEL ARCHITECTURE
+React + TypeScript frontend
+          |
+          | HTTP requests / JSON responses
+          v
+ASP.NET Core REST API
+          |
+          +----> C# simulation/domain logic
+          |
+          +----> EF Core ----> PostgreSQL
+
+Separation of responsibilities:
+- Domain/simulation layer: pure football rules, calculations and match simulation; independent of the UI and ideally independent of the database.
+- API layer: endpoints to create/read clubs, manage leagues and seasons, trigger simulations, and return structured JSON.
+- Persistence layer: relational records for clubs, competitions, fixtures, results, tables and season history.
+- Frontend: display data and provide user controls; do not duplicate core simulation rules in TypeScript.
+
+4. SIMULATION SCOPE
+- A-League: 18 clubs; home-and-away regular season (34 matches per club).
+- B-League: 18 clubs; home-and-away regular season (34 matches per club).
+- Conference North and Conference South: geographically grouped clubs; sizes may vary; home-and-away fixtures, with byes if necessary.
+- A-League top-six finals, with two-legged semifinals and a single grand final as defined in SimulationRules.md.
+- Promotion/relegation and playoffs between A-League and B-League, and between B-League and conferences, according to SimulationRules.md.
+- League tables ranked by points, goal difference, goals scored and deterministic preseason ordering where required.
+- Clubs have a fixed season strength rating in the inclusive range 1.0 to 5.0.
+- Match outcomes use the documented position-based weighted lottery plus strength bonuses, with no home advantage.
+- League-position inputs are frozen at the start of each round; seeded randomness enables reproducible results.
+- Match scores must agree with the selected win/draw/loss outcome.
+- Save past results and season history so simulations can be revisited.
+
+SimulationRules.md and WeightedLotteryRules.txt are the detailed sources of truth for sporting rules. This roadmap describes the software project, not a replacement for those documents.
+
+5. PROPOSED REST API CAPABILITIES
+These are planned capabilities, not implemented endpoints. Exact routes and request/response schemas will be designed later.
+- Retrieve clubs and club details.
+- Retrieve leagues, standings and fixtures.
+- Create or initialise a season.
+- Simulate a fixture, a round or an entire season.
+- Retrieve match results and competition outcomes.
+- Retrieve promotion/relegation decisions and past-season history.
+- Optionally support managing club data through validated API requests.
+
+Potential endpoint shapes (illustrative only):
+GET  /api/clubs
+GET  /api/leagues
+GET  /api/leagues/{id}/standings
+GET  /api/seasons/{id}/fixtures
+POST /api/seasons/{id}/simulate-round
+GET  /api/matches/{id}
+
+6. DATABASE PLAN
+Use PostgreSQL with EF Core migrations. Likely entities include:
+- Club: stable ID, name, state and strength.
+- Competition/League: league identity and structure.
+- Season: year/edition, state and competition relationships.
+- LeagueMembership: club placement in a competition for a given season.
+- Fixture/Match: home and away clubs, round, result and scores.
+- Standing or derived table: points, wins, draws, losses, goals for/against and goal difference.
+- SeasonOutcome: champions, finalists, promotions and relegations.
+
+Final schema and whether standings are stored or computed should be decided when persistence is implemented.
+
+7. FRONTEND PLAN
+React/TypeScript interface to:
+- Browse leagues and clubs.
+- View fixtures, results and league tables.
+- Trigger simulations through the API.
+- View finals, playoffs, promotions and relegations.
+- Browse previous seasons and club histories.
+- Clearly display loading, errors and successful operations.
+
+8. DEVELOPMENT PHASES
+Phase 1: Domain foundations (IN PROGRESS)
+  - Club model and validation, including strength ratings.
+  - Match model and validation.
+  - Unit tests using xUnit and red/green/refactor TDD.
+
+Phase 2: Match engine
+  - Position ratings and capped weights.
+  - Strength bonus and draw weights.
+  - Seeded random outcome selection.
+  - Score generation consistent with outcome.
+  - Thorough unit tests for weights and edge cases.
+
+Phase 3: League and season engine
+  - Competition membership and standings.
+  - Home-and-away fixture generation.
+  - Round simulation with frozen standings.
+  - Tie-breakers, season completion, finals and promotion/relegation.
+
+Phase 4: Persistence
+  - PostgreSQL setup and EF Core models/migrations.
+  - Save/reload clubs, seasons, fixtures and results.
+  - Database integration tests.
+
+Phase 5: ASP.NET Core API
+  - Expose domain and persisted data via REST/JSON.
+  - Input validation, error responses and API documentation.
+  - Endpoint and integration tests.
+
+Phase 6: React/TypeScript frontend
+  - API client, pages and simulation controls.
+  - Standings, results and season-history views.
+
+Phase 7: Portfolio polish
+  - Clear README, architecture diagram, setup instructions and screenshots.
+  - Automated tests in a GitHub Actions CI workflow.
+  - Deployment/demo if practical, with configuration and secrets handled safely.
+  - Explain engineering decisions and trade-offs for job applications.
+
+9. DEVELOPMENT APPROACH
+- Work in small increments, with one clearly defined behaviour at a time.
+- Write a failing test first where practical (RED), implement the minimum code (GREEN), then refactor.
+- The project owner writes the implementation; assistance should start with requirements and review, not complete code, unless requested.
+- Commit meaningful milestones to GitHub.
+- Keep the sporting rules documented and avoid silently changing agreed behaviour.
+- Prefer simple, testable designs over premature complexity.
+
+10. CURRENT STATUS (AS DISCUSSED, 14 OCTOBER 2026)
+- C# solution and xUnit test project created.
+- Club model implemented with name, state, ID, strength, overloaded constructors and validation.
+- Match model implemented with home/away clubs and duplicate-ID rejection.
+- Match null-club validation is currently being refined.
+- User reported passing unit tests through the Match duplicate-ID milestone; do not treat subsequent tests as verified until rerun.
+- API, PostgreSQL integration and React frontend are planned, not yet built.
+
+11. REPOSITORY ORGANISATION
+AustralianFootballSimulator/
+  backend/
+    FootballSimulator.slnx
+    FootballSimulator/          (C# domain, later backend work)
+    FootballSimulator.Tests/    (xUnit tests)
+  frontend/                     (future React/TypeScript app)
+  docs/
+    SimulationRules.md
+    WeightedLotteryRules.txt
+    AustralianFootballSimulator_ProjectRoadmap.txt
+  README.md
+
+The backend may be reorganised into separate domain, API and infrastructure projects as the application grows. Avoid restructuring until it provides a concrete benefit.
+
+12. DEFINITION OF SUCCESS
+A reviewer should be able to clone the repository, understand the architecture, run the tests, launch the backend and frontend, create or load a season, simulate football matches and rounds, inspect tables and outcomes, and see that results persist. The repository should clearly demonstrate independent engineering work and the reasoning behind the implementation.
