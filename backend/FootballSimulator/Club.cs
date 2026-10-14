@@ -9,8 +9,7 @@ public class Club
     public int Id { get; private set; }
 
     // Constructor that runs when a new Club object is created
-    // "this" refers to current object and calls the two parameter constructor
-    // creating the object with the originally supplied arguments
+    // "this" invokes another constructor in the same class
     public Club(string name) : this(name, "Unknown")
     {
     }
@@ -23,9 +22,19 @@ public class Club
     // Overloaded Constructor that runs when a new Club object is created
     public Club(string name, string state, int clubId)
     {
-        // Assign the supplied name to the club's Name property
+        // Assign the supplied name to the club's Name, State and Id properties
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new ArgumentException("Club name must contain at least 1 letter");
+        }
+        if (string.IsNullOrWhiteSpace(state))
+        {
+            throw new ArgumentException("State name must contain at least 1 letter");
+        }
         Name = name;
+
         State = state;
+
         Id = clubId;
     }
 }
