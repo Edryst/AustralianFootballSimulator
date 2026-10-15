@@ -62,4 +62,63 @@ public class MatchTests
         Assert.Throws<ArgumentException>(() =>
             new Match(club_1, null));
     }
+
+    [Fact]
+    public void Match_ShouldStartWithNoScore()
+    {
+        // Arrange
+        Club homeClub = new Club("Rapid Jazz FC", "NSW", 1, 2.2);
+        Club awayClub = new Club("Bacon Grease United", "SA", 423, 1.4);
+
+        Match match = new Match(homeClub, awayClub);
+
+        //Act //Assert
+        Assert.Null(match.HomeScore);
+        Assert.Null(match.AwayScore);
+    }
+
+    [Fact]
+    public void Match_ShouldRecordFinalScore()
+    {
+        // Arrange
+        Club homeClub = new Club("Crusty Mustard CF", "VIC", 132, 1.2);
+        Club awayClub = new Club("Underwater", "TAS", 34, 1.4);
+
+        Match match = new Match(homeClub, awayClub);
+
+        match.RecordResult(3, 1); // Act
+
+        // Assert
+        Assert.Equal(3, match.HomeScore);
+        Assert.Equal(1, match.AwayScore);
+
+    }
+
+    [Fact]
+    public void Match_ShouldRejectNegativeHomeScore()
+    {
+        // Arrange
+        Club homeClub = new Club("Crusty Mustard CF", "VIC", 132, 1.2);
+        Club awayClub = new Club("Underwater", "TAS", 34, 1.4);
+
+        Match match = new Match(homeClub, awayClub);
+
+        // Act // Assert
+        Assert.Throws<ArgumentException>(() => match.RecordResult(-1, 2));
+
+    }
+
+    [Fact]
+    public void Match_ShouldRejectNegativeAwayScore()
+    {
+        // Arrange
+        Club homeClub = new Club("Crusty Mustard CF", "VIC", 132, 1.2);
+        Club awayClub = new Club("Underwater", "TAS", 34, 1.4);
+
+        Match match = new Match(homeClub, awayClub);
+
+        // Act // Assert
+        Assert.Throws<ArgumentException>(() => match.RecordResult(14, -2));
+
+    }
 }

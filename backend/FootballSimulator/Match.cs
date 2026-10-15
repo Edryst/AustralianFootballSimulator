@@ -1,3 +1,5 @@
+using System.Runtime.Serialization;
+
 namespace FootballSimulator;
 
 // Football match class
@@ -6,6 +8,9 @@ public class Match
     // Can be read by other classes, but only changed internally
     public Club HomeClub { get; private set; }
     public Club AwayClub { get; private set; }
+
+    public int? HomeScore { get; private set; }
+    public int? AwayScore { get; private set; }
 
     // Constructor that runs when a new Match object is created
     public Match(Club homeClub, Club awayClub)
@@ -23,5 +28,16 @@ public class Match
 
         HomeClub = homeClub;
         AwayClub = awayClub;
+    }
+
+    public void RecordResult(int homeScore, int awayScore)
+    {
+        if (homeScore < 0 || awayScore < 0)
+        {
+            throw new ArgumentException("Teams can't score in negative goals");
+        }
+
+        HomeScore = homeScore;
+        AwayScore = awayScore;
     }
 }
